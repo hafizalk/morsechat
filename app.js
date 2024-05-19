@@ -59,8 +59,35 @@ function encodeToMorse(sentence) {
   return morseArray.join("");
 }
 
+function getKeyByValue(myMap, searchKeyByValue) {
+  let myKey = [...myMap.entries()]
+    .filter(({ 1: v }) => v === searchKeyByValue)
+    .map(([k]) => k);
+  return myKey;
+}
+
+function decodeFromMorse(code) {
+  var wordArray = code.split("/");
+  var sentence = [];
+  wordArray.forEach((codeword) => {
+    var morse = codeword.split(" ");
+    var letters = [];
+    morse.forEach((symbol) => {
+      let key = getKeyByValue(morseMap(), symbol);
+      if (key) {
+        letters.push(key);
+      }
+    });
+    let word = letters.join("");
+    sentence.push(word);
+  });
+  return sentence.join(" ");
+}
+
 export default function Example() {
   const [sentence, setSentence] = useState("");
+
+  const [code, setCode] = useState("");
 
   return (
     <App>
@@ -69,14 +96,14 @@ export default function Example() {
         <View
           style={{
             width: "100%",
-            height: "30%",
+            height: "100%",
           }}
         >
           <View
             style={{
               flexDirection: "row",
               justifyContent: "center",
-              marginBottom: 10,
+              marginBottom: 20,
             }}
           >
             <Text
@@ -88,7 +115,7 @@ export default function Example() {
               MorseChat
             </Text>
           </View>
-          <View style={{ flexDirection: "row", marginBottom: 10 }}>
+          <View style={{ flexDirection: "row", marginBottom: 30 }}>
             <Text style={{ fontSize: 20, color: "white" }}>
               Type Sentence to Encode
             </Text>
@@ -103,6 +130,28 @@ export default function Example() {
                 setSentence(encoded);
               }}
               title="Encode"
+              style={{
+                color: "white",
+                backgroundColor: "#FC9E34",
+                fontSize: 20,
+              }}
+            />
+          </View>
+          <View style={{ flexDirection: "row", marginBottom: 30 }}>
+            <Text style={{ fontSize: 20, color: "white" }}>
+              Enter Morse code to Decode
+            </Text>
+            <TextInput
+              onChangeText={(words) => setCode(words)}
+              value={code}
+              style={{ flex: 1, backgroundColor: "white", marginRight: 5 }}
+            />
+            <Button
+              onPress={() => {
+                let decoded = decodeFromMorse(code);
+                setCode(decoded);
+              }}
+              title="Decode"
               style={{
                 color: "white",
                 backgroundColor: "#FC9E34",
