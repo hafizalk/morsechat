@@ -1,7 +1,15 @@
 import React, { Component, useState, useEffect } from "react"; // import from react
 
 // import the proton-native components
-import { Window, App, Text, TextInput, View, Button } from "proton-native";
+import {
+  Window,
+  App,
+  Text,
+  TextInput,
+  View,
+  Button,
+  TouchableOpacity,
+} from "proton-native";
 
 function morseMap() {
   let morseMap = new Map();
@@ -84,10 +92,16 @@ function decodeFromMorse(code) {
   return sentence.join(" ");
 }
 
+const isAlphaNumeric = (str) => /^[a-zA-Z0-9]*$/gi.test(str);
+
 export default function Example() {
   const [sentence, setSentence] = useState("");
 
   const [code, setCode] = useState("");
+
+  const [encodeDisabled, setEncodeDisabled] = useState(true);
+
+  const [decodeDisabled, setDecodeDisabled] = useState(true);
 
   return (
     <App>
@@ -120,44 +134,78 @@ export default function Example() {
               Type Sentence to Encode
             </Text>
             <TextInput
-              onChangeText={(words) => setSentence(words)}
+              onChangeText={(words) => {
+                const regex = / /g;
+                if (words == "" || isAlphaNumeric(words.replace(regex, ""))) {
+                  console.log("Enabled!");
+                  setEncodeDisabled(false);
+                } else {
+                  console.log("Disabled!");
+                  setEncodeDisabled(true);
+                }
+                setSentence(words);
+              }}
               value={sentence}
               style={{ flex: 1, backgroundColor: "white", marginRight: 5 }}
             />
-            <Button
+            <TouchableOpacity
               onPress={() => {
-                let encoded = encodeToMorse(sentence);
-                setSentence(encoded);
+                if (!encodeDisabled) {
+                  console.log("Encoding!");
+                  let encoded = encodeToMorse(sentence);
+                  setSentence(encoded);
+                }
               }}
-              title="Encode"
               style={{
-                color: "white",
-                backgroundColor: "#FC9E34",
-                fontSize: 20,
+                backgroundColor: encodeDisabled ? "grey" : "#FC9E34",
+                width: 100,
+                height: 40,
+                alignItems: "center",
+                justifyContent: "center",
               }}
-            />
+              activeOpacity={encodeDisabled ? 1 : 0.7}
+            >
+              <Text style={{ color: "white", fontSize: 20 }}>{"Encode"}</Text>
+            </TouchableOpacity>
           </View>
           <View style={{ flexDirection: "row", marginBottom: 30 }}>
             <Text style={{ fontSize: 20, color: "white" }}>
               Enter Morse code to Decode
             </Text>
             <TextInput
-              onChangeText={(words) => setCode(words)}
+              onChangeText={(words) => {
+                const regex = / /g;
+                if (words == "" || !isAlphaNumeric(words.replace(regex, ""))) {
+                  console.log("Decode Enabled!");
+                  setDecodeDisabled(false);
+                } else {
+                  console.log("Decode Disabled!");
+                  setDecodeDisabled(true);
+                }
+                setCode(words);
+              }}
               value={code}
               style={{ flex: 1, backgroundColor: "white", marginRight: 5 }}
             />
-            <Button
+            <TouchableOpacity
               onPress={() => {
-                let decoded = decodeFromMorse(code);
-                setCode(decoded);
+                if (!decodeDisabled) {
+                  console.log("Decoding!");
+                  let decoded = decodeFromMorse(code);
+                  setCode(decoded);
+                }
               }}
-              title="Decode"
               style={{
-                color: "white",
-                backgroundColor: "#FC9E34",
-                fontSize: 20,
+                backgroundColor: decodeDisabled ? "grey" : "#FC9E34",
+                width: 100,
+                height: 40,
+                alignItems: "center",
+                justifyContent: "center",
               }}
-            />
+              activeOpacity={decodeDisabled ? 1 : 0.7}
+            >
+              <Text style={{ color: "white", fontSize: 20 }}>{"Decode"}</Text>
+            </TouchableOpacity>
           </View>
         </View>
       </Window>
