@@ -40,8 +40,8 @@ function morseMap() {
   morseMap.set("Y", "-.--");
   morseMap.set("Z", "--..");
 
-  morseMap.set(0, ".----");
-  morseMap.set(1, "..---");
+  morseMap.set(1, ".----");
+  morseMap.set(2, "..---");
   morseMap.set(3, "...--");
   morseMap.set(4, "....-");
   morseMap.set(5, ".....");
@@ -49,14 +49,15 @@ function morseMap() {
   morseMap.set(7, "--...");
   morseMap.set(8, "---..");
   morseMap.set(9, "----.");
+  morseMap.set(0, "-----");
 
   return morseMap;
 }
 
-function encodeToMorse(sentence) {
+function encodeToMorse(morseMap, sentence) {
   var wordArray = sentence.split("");
   var morseArray = [];
-  var map = morseMap();
+  var map = morseMap;
   wordArray.forEach((letter) => {
     if (map.get(letter.toUpperCase())) {
       morseArray.push(map.get(letter.toUpperCase()).concat(" "));
@@ -74,14 +75,14 @@ function getKeyByValue(myMap, searchKeyByValue) {
   return myKey;
 }
 
-function decodeFromMorse(code) {
+function decodeFromMorse(morseMap, code) {
   var wordArray = code.split("/");
   var sentence = [];
   wordArray.forEach((codeword) => {
     var morse = codeword.split(" ");
     var letters = [];
     morse.forEach((symbol) => {
-      let key = getKeyByValue(morseMap(), symbol);
+      let key = getKeyByValue(morseMap, symbol);
       if (key) {
         letters.push(key);
       }
@@ -94,7 +95,26 @@ function decodeFromMorse(code) {
 
 const isAlphaNumeric = (str) => /^[a-zA-Z0-9]*$/gi.test(str);
 
-export default function Example() {
+const shuffle = (array) => {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+  return array;
+};
+
+function shuffleMap(originalMap) {
+  let keys = Array.from(originalMap.keys());
+  let values = Array.from(originalMap.values());
+  let shuffledValues = shuffle(values);
+  let newMorseMap = new Map();
+  for (let i = 0; i < keys.length - 1; i++) {
+    newMorseMap.set(keys[i], shuffledValues[i]);
+  }
+  return newMorseMap;
+}
+
+export default function MorseChat() {
   const [sentence, setSentence] = useState("");
 
   const [code, setCode] = useState("");
@@ -103,10 +123,14 @@ export default function Example() {
 
   const [decodeDisabled, setDecodeDisabled] = useState(true);
 
+  const [morseCodeMap, setMorseMap] = useState(morseMap());
+
+  const [newMorseMapJson, setMorseJson] = useState("");
+
   return (
     <App>
       {/* you must always include App around everything */}
-      <Window style={{ width: 900, height: 500, backgroundColor: "black" }}>
+      <Window style={{ width: 1200, height: 450, backgroundColor: "black" }}>
         <View
           style={{
             width: "100%",
@@ -137,10 +161,8 @@ export default function Example() {
               onChangeText={(words) => {
                 const regex = / /g;
                 if (words == "" || isAlphaNumeric(words.replace(regex, ""))) {
-                  console.log("Enabled!");
                   setEncodeDisabled(false);
                 } else {
-                  console.log("Disabled!");
                   setEncodeDisabled(true);
                 }
                 setSentence(words);
@@ -151,8 +173,7 @@ export default function Example() {
             <TouchableOpacity
               onPress={() => {
                 if (!encodeDisabled) {
-                  console.log("Encoding!");
-                  let encoded = encodeToMorse(sentence);
+                  let encoded = encodeToMorse(morseCodeMap, sentence);
                   setSentence(encoded);
                 }
               }}
@@ -176,10 +197,8 @@ export default function Example() {
               onChangeText={(words) => {
                 const regex = / /g;
                 if (words == "" || !isAlphaNumeric(words.replace(regex, ""))) {
-                  console.log("Decode Enabled!");
                   setDecodeDisabled(false);
                 } else {
-                  console.log("Decode Disabled!");
                   setDecodeDisabled(true);
                 }
                 setCode(words);
@@ -190,8 +209,7 @@ export default function Example() {
             <TouchableOpacity
               onPress={() => {
                 if (!decodeDisabled) {
-                  console.log("Decoding!");
-                  let decoded = decodeFromMorse(code);
+                  let decoded = decodeFromMorse(morseCodeMap, code);
                   setCode(decoded);
                 }
               }}
@@ -206,6 +224,72 @@ export default function Example() {
             >
               <Text style={{ color: "white", fontSize: 20 }}>{"Decode"}</Text>
             </TouchableOpacity>
+          </View>
+          <View
+            style={{
+              flexDirection: "row",
+              marginTop: 40,
+              marginBottom: 30,
+              width: "100%",
+              justifyContent: "space-between",
+            }}
+          >
+            <TouchableOpacity
+              onPress={() => {
+                const shuffledMap = shuffleMap(morseMap());
+                setMorseMap(shuffledMap);
+                const obj = Object.fromEntries(shuffledMap);
+                const json = JSON.stringify(obj);
+                setMorseJson(json);
+              }}
+              style={{
+                backgroundColor: "#FC9E34",
+                width: 200,
+                height: 40,
+                alignItems: "center",
+                justifyContent: "center",
+                marginLeft: 20,
+              }}
+            >
+              <Text style={{ color: "white", fontSize: 20 }}>
+                {"Shuffle Encryption"}
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => {
+                setMorseMap(morseMap());
+                const obj = Object.fromEntries(morseMap());
+                const json = JSON.stringify(obj);
+                setMorseJson(json);
+              }}
+              style={{
+                backgroundColor: "#FC9E34",
+                width: 200,
+                height: 40,
+                alignItems: "center",
+                justifyContent: "center",
+                marginRight: 20,
+              }}
+            >
+              <Text style={{ color: "white", fontSize: 20 }}>
+                {"Reset Encryption"}
+              </Text>
+            </TouchableOpacity>
+          </View>
+          <View style={{ flexDirection: "row", marginBottom: 30, flexWrap: 'wrap' }}>
+            <TextInput
+              style={{
+                flex: 1,
+                backgroundColor: "white",
+                marginRight: 5,
+                height: 100
+              }}
+              multiline={true}
+              value={newMorseMapJson}
+              onChangeText={(morseMap) => {
+                setMorseJson(morseMap);
+              }}
+            />
           </View>
         </View>
       </Window>
