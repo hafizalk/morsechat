@@ -2,7 +2,7 @@ import React from "react";
 import { AppRegistry } from "proton-native";
 import MorseChat from "./app";
 
-AppRegistry.registerComponent("example", <MorseChat />); // and finally render your main component
+AppRegistry.registerComponent("morsechat", <MorseChat />); // and finally render your main component
 
 // ================================================================================
 // This is for hot reloading (this will be stripped off in production by webpack)

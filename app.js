@@ -95,18 +95,20 @@ function decodeFromMorse(morseMap, code) {
 
 const isAlphaNumeric = (str) => /^[a-zA-Z0-9]*$/gi.test(str);
 
-const shuffle = (array) => {
+const shuffle = (array, randomNumber) => {
+  let number = parseFloat(randomNumber);
+  let random = number > 0 ? number : Math.random();
   for (let i = array.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
+    const j = Math.floor(random * (i + 1));
     [array[i], array[j]] = [array[j], array[i]];
   }
   return array;
 };
 
-function shuffleMap(originalMap) {
+function shuffleMap(originalMap, randomNumber) {
   let keys = Array.from(originalMap.keys());
   let values = Array.from(originalMap.values());
-  let shuffledValues = shuffle(values);
+  let shuffledValues = shuffle(values, randomNumber);
   let newMorseMap = new Map();
   for (let i = 0; i < keys.length - 1; i++) {
     newMorseMap.set(keys[i], shuffledValues[i]);
@@ -127,16 +129,18 @@ export default function MorseChat() {
 
   const [newMorseMapJson, setMorseJson] = useState("");
 
+  const [randomNumber, setRandomNumber] = useState("0");
+
   return (
     <App>
-      {/* you must always include App around everything */}
-      <Window style={{ width: 1200, height: 450, backgroundColor: "black" }}>
-        <View
-          style={{
-            width: "100%",
-            height: "100%",
-          }}
-        >
+      <Window
+        style={{
+          width: 1200,
+          height: 530,
+          backgroundColor: "black",
+        }}
+      >
+        <View style={{ width: "100%", height: "100%" }}>
           <View
             style={{
               flexDirection: "row",
@@ -228,6 +232,30 @@ export default function MorseChat() {
           <View
             style={{
               flexDirection: "row",
+              marginTop: 29,
+              marginBottom: 20,
+              flexWrap: "wrap",
+            }}
+          >
+            <Text style={{ fontSize: 20, color: "white" }}>
+              Enter Random Number for Encryption between 0 and 1
+            </Text>
+            <TextInput
+              style={{
+                flex: 1,
+                backgroundColor: "white",
+                marginRight: 5,
+                marginLeft: 20,
+                height: 40,
+              }}
+              value={randomNumber}
+              onChangeText={setRandomNumber}
+              keyboardType="numeric"
+            />
+          </View>
+          <View
+            style={{
+              flexDirection: "row",
               marginTop: 40,
               marginBottom: 30,
               width: "100%",
@@ -236,7 +264,7 @@ export default function MorseChat() {
           >
             <TouchableOpacity
               onPress={() => {
-                const shuffledMap = shuffleMap(morseMap());
+                const shuffledMap = shuffleMap(morseMap(), randomNumber);
                 setMorseMap(shuffledMap);
                 const obj = Object.fromEntries(shuffledMap);
                 const json = JSON.stringify(obj);
@@ -276,15 +304,17 @@ export default function MorseChat() {
               </Text>
             </TouchableOpacity>
           </View>
-          <View style={{ flexDirection: "row", marginBottom: 30, flexWrap: 'wrap' }}>
+          <View style={{ flexDirection: "row", flexWrap: "wrap" }}>
             <TextInput
               style={{
                 flex: 1,
                 backgroundColor: "white",
                 marginRight: 5,
-                height: 100
+                height: 100,
               }}
-              multiline={true}
+              editable={false}
+              multiline
+              numberOfLines={3}
               value={newMorseMapJson}
               onChangeText={(morseMap) => {
                 setMorseJson(morseMap);
